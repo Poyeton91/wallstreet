@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Écran partagé</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Écran partagé</h1>
+
+    <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
+
+    <canvas id="chart" width="800" height="300"></canvas>
+
+    <h2>Classement</h2>
+    <ol id="leaderboard"></ol>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/screen.js"></script>
+</body>
+</html>
