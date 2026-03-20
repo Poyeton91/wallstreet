@@ -132,7 +132,7 @@ Mise à jour simultanée - Faible latence - Support de 50+ joueurs
 
 ------------------------------------------------------------------------
 
-# 🎓 Objectif pédagogique du projet
+# Pour lancer le jeu sur réseau local :
 
 Pour lancer le jeu sur réseau local :
 
