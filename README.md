@@ -134,22 +134,29 @@ Mise à jour simultanée - Faible latence - Support de 50+ joueurs
 
 # Pour lancer le jeu sur réseau local :
 
-Pour lancer le jeu sur réseau local :
+# Pour lancer le jeu sur réseau local :
 
- - Ouvrir le dossier "code" dans powershell (drag and drop le dossier dans le terminal avec un cd)
- - Télécharger node.js pour la première fois (pas besoin si déjà installé) :
- '''
- npm init -y
- npm install express socket.io
- '''
- - Lancer le serveur :
- '''
- node server.js
- '''
- - Trouver l'ip de son ordinateur 
- '''ipconfig''' dans powershell
- Cherchez la ligne "Adresse IPv4 . . . . . . . . . . : 192.168.X.X" --> C'est votre ip
+- Ouvrir le dossier "code" dans PowerShell (drag and drop le dossier dans le terminal avec un cd)
 
- - sur navigateur : mettre '''ip:port''' Normalement, le port de base est 3000
+- Télécharger Node.js pour la première fois (pas besoin si déjà installé) :
+
+```bash
+npm init -y
+npm install express socket.io
+```
+
+- Lancer le serveur :
+
+```bash
+node server.js
+```
+
+- Trouver l'IP de son ordinateur  
+`ipconfig` dans PowerShell  
+Cherchez la ligne "Adresse IPv4 : 192.168.X.X" → C'est votre IP
+
+- Sur navigateur : mettre `ip:port`  
+Normalement, le port de base est 3000
+
 
 
