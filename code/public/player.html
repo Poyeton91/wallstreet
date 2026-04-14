@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Joueur</title>
-  <link rel="stylesheet" href="/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joueur - Le Rat de Wall Street</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="player-body">
 <main class="player-container">
-  <h1>Trading Game</h1>
+    <h1>Trading Game</h1>
 
-  <section id="join-section" class="player-card">
-    <h2>Rejoindre la partie</h2>
-    <input type="text" id="name-input" placeholder="Ton pseudo">
-    <button id="join-button">Valider</button>
-  </section>
+    <section id="join-section" class="player-card">
+        <h2>Rejoindre la partie</h2>
+        <input type="text" id="name-input" placeholder="Ton pseudo">
+        <button id="join-button">Valider</button>
+    </section>
 
-  <section id="waiting-section" class="player-card" style="display: none;">
-    <h2>En attente</h2>
-    <p>Ton pseudo a bien été enregistré.</p>
-    <p>La partie n'est pas encore ouverte.</p>
-    <p>Patiente jusqu'au lancement depuis le lobby.</p>
-  </section>
+    <section id="waiting-section" class="player-card" style="display: none;">
+        <h2>En attente</h2>
+        <p>Ton pseudo a bien été enregistré.</p>
+        <p>La partie n'est pas encore ouverte.</p>
+        <p>Patiente jusqu'au lancement depuis le lobby.</p>
+    </section>
 
-  <section id="game-section" class="player-card" style="display: none;">
-    <p><strong>Nom :</strong> <span id="player-name"></span></p>
-    <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
-    <p><strong>Cash :</strong> <span id="cash">0</span> €</p>
-    <p><strong>Actions :</strong> <span id="shares">0</span></p>
-    <p><strong>Patrimoine total :</strong> <span id="total-value">0</span> €</p>
+    <section id="game-section" class="player-card" style="display: none;">
+        <h2>Bonjour <span id="player-name"></span></h2>
+        <p><strong>Cash :</strong> <span id="cash">10000</span> €</p>
+        <p><strong>Patrimoine total :</strong> <span id="total-value">10000</span> €</p>
 
-    <div class="actions">
-      <button id="buy-button">BUY</button>
-      <button id="sell-button">SELL</button>
-    </div>
-  </section>
+        <div id="actions-container">
+            <!-- Les actions seront injectées ici par JavaScript -->
+        </div>
+    </section>
 </main>
 
 <script src="/socket.io/socket.io.js"></script>
