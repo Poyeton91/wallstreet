@@ -44,6 +44,14 @@ joinButton.addEventListener("click", () => {
   socket.emit("player:join", name);
 });
 
+socket.on("player:joined", data => {
+  if (data.isGameOpen) {
+    showGameState();
+  } else {
+    showWaitingState();
+  }
+});
+
 // Écoute des mises à jour globales pour afficher les boutons
 socket.on("game:update", data => {
   // On crée l'interface d'achat/vente si elle n'existe pas encore
@@ -57,11 +65,11 @@ socket.on("game:update", data => {
       title.textContent = `${action.name} (${action.shortName})`;
 
       const priceSpan = document.createElement("p");
-      priceSpan.id = `price-${action.shortName}`;
-      priceSpan.textContent = `Prix: ${action.price} €`; // Changed from action.currentPrice
+      priceSpan.id = `price-${action.name}`; // Changed to action.name
+      priceSpan.textContent = `Prix: ${action.currentPrice} €`;
 
       const sharesSpan = document.createElement("p");
-      sharesSpan.id = `shares-${action.shortName}`;
+      sharesSpan.id = `shares-${action.name}`; // Changed to action.name
       sharesSpan.textContent = `Vous possédez: 0 actions`;
 
       const controlsDiv = document.createElement("div");
@@ -74,7 +82,7 @@ socket.on("game:update", data => {
           const btn = document.createElement("button");
           btn.textContent = `+${qty}`;
           btn.style.margin = "2px";
-          btn.onclick = () => socket.emit("player:buy", { actionName: action.shortName, quantity: qty }); // Changed actionId to actionName
+          btn.onclick = () => socket.emit("player:buy", { actionName: action.name, quantity: qty }); // Changed to action.name
           buyDiv.appendChild(btn);
       });
 
@@ -85,20 +93,12 @@ socket.on("game:update", data => {
           const btn = document.createElement("button");
           btn.textContent = `-${qty}`;
           btn.style.margin = "2px";
-          btn.onclick = () => socket.emit("player:sell", { actionName: action.shortName, quantity: qty }); // Changed actionId to actionName
+          btn.onclick = () => socket.emit("player:sell", { actionName: action.name, quantity: qty }); // Changed to action.name
           sellDiv.appendChild(btn);
       });
 
       controlsDiv.appendChild(buyDiv);
       controlsDiv.appendChild(sellDiv);
-
-socket.on("player:joined", data => {
-  if (data.isGameOpen) {
-    showGameState();
-  } else {
-    showWaitingState();
-  }
-});
 
       actionDiv.appendChild(title);
       actionDiv.appendChild(priceSpan);
@@ -110,9 +110,9 @@ socket.on("player:joined", data => {
   } else {
     // Si l'interface existe, on met juste à jour le prix
     data.actions.forEach(action => {
-      const priceSpan = document.getElementById(`price-${action.shortName}`);
+      const priceSpan = document.getElementById(`price-${action.name}`); // Changed to action.name
       if (priceSpan) {
-        priceSpan.textContent = `Prix: ${action.price} €`; // Changed from action.currentPrice
+        priceSpan.textContent = `Prix: ${action.currentPrice} €`;
       }
     });
   }
@@ -120,12 +120,9 @@ socket.on("player:joined", data => {
 
 // Écoute des mises à jour du joueur (cash, actions possédées)
 socket.on("player:update", data => {
-  playerNameEl.textContent = data.name || "";
-  currentPriceEl.textContent = data.currentPrice;
-  playerNameEl.textContent = data.name;
-  cashEl.textContent = data.cash;
-  sharesEl.textContent = data.shares;
-  totalValueEl.textContent = data.totalValue;
+  if (playerNameEl) playerNameEl.textContent = data.name || "";
+  if (cashEl) cashEl.textContent = data.cash;
+  if (totalValueEl) totalValueEl.textContent = data.totalValue;
 
   if (!hasSubmittedName) {
     showJoinState();
@@ -139,10 +136,12 @@ socket.on("player:update", data => {
   }
 
   // Met à jour l'affichage des actions possédées par le joueur
-  for (const actionName in data.shares) { // Changed actionId to actionName
-    const sharesSpan = document.getElementById(`shares-${actionName}`); // Changed actionId to actionName
-    if (sharesSpan) {
-      sharesSpan.textContent = `Vous possédez: ${data.shares[actionName]} actions`;
+  if (data.portfolio) { // Changed from data.shares to data.portfolio
+    for (const actionName in data.portfolio) { // Changed from data.shares to data.portfolio
+      const sharesSpan = document.getElementById(`shares-${actionName}`);
+      if (sharesSpan) {
+        sharesSpan.textContent = `Vous possédez: ${data.portfolio[actionName]} actions`; // Changed from data.shares to data.portfolio
+      }
     }
   }
 });
