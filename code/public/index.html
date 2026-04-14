@@ -2,18 +2,52 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Trading Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby - Trading Game</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  <main class="container">
-    <h1>Trading Game</h1>
-    <p>Choisis ton interface :</p>
+<body class="lobby-body">
+<div id="background-slideshow"></div>
 
-    <div class="menu">
-      <a href="/player.html">Mode joueur</a>
-      <a href="/screen.html">Mode écran partagé</a>
+<main class="lobby-stage">
+  <section class="lobby-panel">
+    <h1 class="lobby-title">Trading Game</h1>
+
+    <div class="qr-wrapper">
+      <div id="qrcode"></div>
     </div>
-  </main>
+
+    <div class="lobby-status-card">
+      <p class="status-line">
+        État : <span id="game-status">Partie fermée</span>
+      </p>
+      <p class="status-line">
+        En attente : <span id="waiting-count">0</span>
+      </p>
+      <p class="status-line">
+        En jeu : <span id="active-count">0</span>
+      </p>
+    </div>
+
+    <div class="admin-actions">
+      <button id="open-game-button">Ouvrir la partie</button>
+      <button id="close-game-button">Fermer la partie</button>
+    </div>
+  </section>
+</main>
+<script>
+  (function () {
+    const password = "12345";
+    let userInput = prompt("Mot de passe requis");
+
+    while (userInput !== password) {
+      userInput = prompt("Mot de passe incorrect. Réessaie :");
+    }
+  })();
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="/js/lobby.js"></script>
 </body>
 </html>

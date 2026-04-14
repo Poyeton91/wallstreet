@@ -2,33 +2,42 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Joueur</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  <main class="container">
-    <h1>Mode joueur</h1>
+<body class="player-body">
+<main class="player-container">
+  <h1>Trading Game</h1>
 
-    <div id="join-section">
-      <input type="text" id="name-input" placeholder="Ton pseudo">
-      <button id="join-button">Rejoindre</button>
+  <section id="join-section" class="player-card">
+    <h2>Rejoindre la partie</h2>
+    <input type="text" id="name-input" placeholder="Ton pseudo">
+    <button id="join-button">Valider</button>
+  </section>
+
+  <section id="waiting-section" class="player-card" style="display: none;">
+    <h2>En attente</h2>
+    <p>Ton pseudo a bien été enregistré.</p>
+    <p>La partie n'est pas encore ouverte.</p>
+    <p>Patiente jusqu'au lancement depuis le lobby.</p>
+  </section>
+
+  <section id="game-section" class="player-card" style="display: none;">
+    <p><strong>Nom :</strong> <span id="player-name"></span></p>
+    <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
+    <p><strong>Cash :</strong> <span id="cash">0</span> €</p>
+    <p><strong>Actions :</strong> <span id="shares">0</span></p>
+    <p><strong>Patrimoine total :</strong> <span id="total-value">0</span> €</p>
+
+    <div class="actions">
+      <button id="buy-button">BUY</button>
+      <button id="sell-button">SELL</button>
     </div>
+  </section>
+</main>
 
-    <div id="game-section" style="display: none;">
-      <p><strong>Nom :</strong> <span id="player-name"></span></p>
-      <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
-      <p><strong>Cash :</strong> <span id="cash">0</span> €</p>
-      <p><strong>Actions :</strong> <span id="shares">0</span></p>
-      <p><strong>Patrimoine total :</strong> <span id="total-value">0</span> €</p>
-
-      <div class="actions">
-        <button id="buy-button">BUY</button>
-        <button id="sell-button">SELL</button>
-      </div>
-    </div>
-  </main>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/player.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/player.js"></script>
 </body>
 </html>

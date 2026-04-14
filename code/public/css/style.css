@@ -1,44 +1,164 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 20px;
   background: #f4f4f4;
+  color: #111;
+}
+
+.container,
+.player-container {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .container {
-  max-width: 900px;
-  margin: 0 auto;
   background: white;
   padding: 20px;
   border-radius: 12px;
 }
 
-.menu {
-  display: flex;
-  gap: 20px;
+.player-body {
+  background: #f4f4f4;
+}
+
+.player-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   margin-top: 20px;
 }
 
-.menu a,
 button {
   display: inline-block;
   padding: 10px 16px;
-  text-decoration: none;
   border: none;
   border-radius: 8px;
   background: #222;
   color: white;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 input {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 1rem;
 }
 
-.actions {
+.actions,
+.admin-actions {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-top: 20px;
+}
+
+/* ===== LOBBY ===== */
+
+.lobby-body {
+  min-height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  color: white;
+}
+
+#background-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+#background-slideshow.background-fallback {
+  background: linear-gradient(135deg, #111, #333);
+}
+
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.6s ease-in-out;
+}
+
+.bg-slide.active {
+  opacity: 1;
+}
+
+.lobby-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.lobby-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.lobby-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.qr-wrapper {
+  background: rgba(255, 255, 255, 0.96);
+  padding: 18px;
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+#qrcode img {
+  display: block;
+}
+
+.lobby-status-card {
+  min-width: 240px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(20, 20, 20, 0.58);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  text-align: center;
+}
+
+.status-line {
+  margin: 6px 0;
+  font-size: 1.05rem;
+}
+
+.admin-actions button {
+  background: rgba(20, 20, 20, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 640px) {
+  .qr-wrapper {
+    padding: 14px;
+  }
+
+  #qrcode {
+    transform: scale(0.88);
+    transform-origin: center;
+  }
+
+  .lobby-status-card {
+    min-width: 0;
+    width: 100%;
+  }
 }

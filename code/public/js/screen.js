@@ -1,10 +1,11 @@
 const socket = io();
 
+const statusEl = document.getElementById("screen-status");
 const currentPriceEl = document.getElementById("current-price");
 const leaderboardEl = document.getElementById("leaderboard");
 
 const ctx = document.getElementById("chart");
-let chart = new Chart(ctx, {
+const chart = new Chart(ctx, {
   type: "line",
   data: {
     labels: [],
@@ -21,6 +22,7 @@ let chart = new Chart(ctx, {
 });
 
 socket.on("game:update", data => {
+  statusEl.textContent = data.isGameOpen ? "Partie ouverte" : "Partie fermée";
   currentPriceEl.textContent = data.currentPrice;
 
   chart.data.labels = data.priceHistory.map((_, index) => index + 1);
