@@ -2,33 +2,26 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Joueur</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Joueur - Le Rat de Wall Street</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <main class="container">
-    <h1>Mode joueur</h1>
+  <div id="join-section">
+    <h1>Rejoindre la partie</h1>
+    <input type="text" id="name-input" placeholder="Ton pseudo">
+    <button id="join-button">Rejoindre</button>
+  </div>
 
-    <div id="join-section">
-      <input type="text" id="name-input" placeholder="Ton pseudo">
-      <button id="join-button">Rejoindre</button>
+  <div id="game-section" style="display: none;">
+    <h2>Bonjour <span id="player-name"></span></h2>
+    <p>Argent : <span id="cash">10000</span> €</p>
+
+    <div id="actions-container">
+      <!-- Les actions seront injectées ici par JavaScript -->
     </div>
+  </div>
 
-    <div id="game-section" style="display: none;">
-      <p><strong>Nom :</strong> <span id="player-name"></span></p>
-      <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
-      <p><strong>Cash :</strong> <span id="cash">0</span> €</p>
-      <p><strong>Actions :</strong> <span id="shares">0</span></p>
-      <p><strong>Patrimoine total :</strong> <span id="total-value">0</span> €</p>
-
-      <div class="actions">
-        <button id="buy-button">BUY</button>
-        <button id="sell-button">SELL</button>
-      </div>
-    </div>
-  </main>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/player.js"></script>
+  <script src="js/player.js"></script>
 </body>
 </html>

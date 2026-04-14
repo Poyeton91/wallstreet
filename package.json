@@ -1,0 +1,21 @@
+{
+  "name": "le-rat-de-wall-street",
+  "version": "1.0.0",
+  "description": "**Le Rat de Wall Street** est un jeu multijoueur en temps réel jouable\r sur téléphone avec un écran commun projeté.\\\r Chaque joueur incarne un trader qui doit acheter et vendre au bon moment\r pour devenir le plus riche avant la fin de la partie.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.iut-orsay.fr/spoyeto/le-rat-de-wall-street"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}
