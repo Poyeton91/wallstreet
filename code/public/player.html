@@ -4,36 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Joueur - Le Rat de Wall Street</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/player.css">
 </head>
-<body class="player-body">
-<main class="player-container">
-    <h1>Trading Game</h1>
+<body>
 
+<main class="player-container">
+    <!-- Section to Join Game -->
     <section id="join-section" class="player-card">
         <h2>Rejoindre la partie</h2>
         <input type="text" id="name-input" placeholder="Ton pseudo">
         <button id="join-button">Valider</button>
     </section>
 
+    <!-- Section for Waiting Room -->
     <section id="waiting-section" class="player-card" style="display: none;">
         <h2>En attente</h2>
         <p>Ton pseudo a bien été enregistré.</p>
-        <p>La partie n'est pas encore ouverte.</p>
-        <p>Patiente jusqu'au lancement depuis le lobby.</p>
+        <p>La partie n'est pas encore ouverte. Patiente...</p>
     </section>
 
-    <section id="game-section" class="player-card" style="display: none;">
-        <h2>Bonjour <span id="player-name"></span></h2>
-        <p><strong>Cash :</strong> <span id="cash">10000</span> €</p>
-        <p><strong>Patrimoine total :</strong> <span id="total-value">10000</span> €</p>
+    <!-- Main Game Section -->
+    <section id="game-section" style="display: none;">
+        <div class="player-name" id="player-name-display"></div>
+        <div class="net-worth" id="net-worth-display"></div>
+        <canvas id="background-graph" class="background-graph"></canvas>
+        <div class="wallet" id="wallet-display"></div>
 
-        <div id="actions-container">
-            <!-- Les actions seront injectées ici par JavaScript -->
+        <div class="actions-container" id="actions-container">
+            <!-- Action cards will be injected here -->
         </div>
     </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/player.js"></script>
 </body>

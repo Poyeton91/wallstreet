@@ -1,147 +1,285 @@
 const socket = io();
 
-const joinSection = document.getElementById("join-section");
-const waitingSection = document.getElementById("waiting-section");
-const gameSection = document.getElementById("game-section");
+// --- DOM Elements ---
+const joinSection = document.getElementById('join-section');
+const waitingSection = document.getElementById('waiting-section');
+const gameSection = document.getElementById('game-section');
 
-const nameInput = document.getElementById("name-input");
-const joinButton = document.getElementById("join-button");
+const nameInput = document.getElementById('name-input');
+const joinButton = document.getElementById('join-button');
 
-const playerNameEl = document.getElementById("player-name");
-const cashEl = document.getElementById("cash");
-const totalValueEl = document.getElementById("total-value");
-const actionsContainer = document.getElementById("actions-container");
+const playerNameDisplay = document.getElementById('player-name-display');
+const netWorthDisplay = document.getElementById('net-worth-display');
+const walletDisplay = document.getElementById('wallet-display');
+const actionsContainer = document.getElementById('actions-container');
+const backgroundGraphCanvas = document.getElementById('background-graph');
 
+// --- State ---
+let netWorthHistory = [];
+let netWorthChart;
 let hasSubmittedName = false;
+let currentPlayerCash = 0; // Global variable for player's cash
 
-function showJoinState() {
-  joinSection.style.display = "block";
-  waitingSection.style.display = "none";
-  gameSection.style.display = "none";
+// --- State Management Functions ---
+function showState(state) {
+    joinSection.style.display = 'none';
+    waitingSection.style.display = 'none';
+    gameSection.style.display = 'none';
+
+    if (state === 'join') joinSection.style.display = 'block';
+    else if (state === 'waiting') waitingSection.style.display = 'block';
+    else if (state === 'game') gameSection.style.display = 'block';
 }
 
-function showWaitingState() {
-  joinSection.style.display = "none";
-  waitingSection.style.display = "block";
-  gameSection.style.display = "none";
-}
-
-function showGameState() {
-  joinSection.style.display = "none";
-  waitingSection.style.display = "none";
-  gameSection.style.display = "block";
-}
-
-joinButton.addEventListener("click", () => {
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    alert("Entre un pseudo.");
-    return;
-  }
-
-  hasSubmittedName = true;
-  socket.emit("player:join", name);
-});
-
-socket.on("player:joined", data => {
-  if (data.isGameOpen) {
-    showGameState();
-  } else {
-    showWaitingState();
-  }
-});
-
-// Écoute des mises à jour globales pour afficher les boutons
-socket.on("game:update", data => {
-  // On crée l'interface d'achat/vente si elle n'existe pas encore
-  if (actionsContainer.children.length === 0) {
-    data.actions.forEach(action => {
-      const actionDiv = document.createElement("div");
-      actionDiv.className = "action-card";
-      actionDiv.style = "margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;";
-
-      const title = document.createElement("h3");
-      title.textContent = `${action.name} (${action.shortName})`;
-
-      const priceSpan = document.createElement("p");
-      priceSpan.id = `price-${action.name}`; // Changed to action.name
-      priceSpan.textContent = `Prix: ${action.currentPrice} €`;
-
-      const sharesSpan = document.createElement("p");
-      sharesSpan.id = `shares-${action.name}`; // Changed to action.name
-      sharesSpan.textContent = `Vous possédez: 0 actions`;
-
-      const controlsDiv = document.createElement("div");
-      controlsDiv.style = "display: flex; gap: 10px; margin-top: 10px;";
-
-      // Conteneur Achat
-      const buyDiv = document.createElement("div");
-      buyDiv.innerHTML = '<strong>Acheter:</strong><br>';
-      [1, 5, 10, 100, 1000].forEach(qty => {
-          const btn = document.createElement("button");
-          btn.textContent = `+${qty}`;
-          btn.style.margin = "2px";
-          btn.onclick = () => socket.emit("player:buy", { actionName: action.name, quantity: qty }); // Changed to action.name
-          buyDiv.appendChild(btn);
-      });
-
-      // Conteneur Vente
-      const sellDiv = document.createElement("div");
-      sellDiv.innerHTML = '<strong>Vendre:</strong><br>';
-      [1, 5, 10, 100, 1000].forEach(qty => {
-          const btn = document.createElement("button");
-          btn.textContent = `-${qty}`;
-          btn.style.margin = "2px";
-          btn.onclick = () => socket.emit("player:sell", { actionName: action.name, quantity: qty }); // Changed to action.name
-          sellDiv.appendChild(btn);
-      });
-
-      controlsDiv.appendChild(buyDiv);
-      controlsDiv.appendChild(sellDiv);
-
-      actionDiv.appendChild(title);
-      actionDiv.appendChild(priceSpan);
-      actionDiv.appendChild(sharesSpan);
-      actionDiv.appendChild(controlsDiv);
-
-      actionsContainer.appendChild(actionDiv);
+// --- Chart Functions ---
+function initializeChart() {
+    if (netWorthChart) netWorthChart.destroy();
+    const ctx = backgroundGraphCanvas.getContext('2d');
+    netWorthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Net Worth',
+                data: [],
+                borderColor: '#FFFFFF', // Solid white color
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false } }
+        }
     });
-  } else {
-    // Si l'interface existe, on met juste à jour le prix
-    data.actions.forEach(action => {
-      const priceSpan = document.getElementById(`price-${action.name}`); // Changed to action.name
-      if (priceSpan) {
-        priceSpan.textContent = `Prix: ${action.currentPrice} €`;
-      }
-    });
-  }
-});
+}
 
-// Écoute des mises à jour du joueur (cash, actions possédées)
-socket.on("player:update", data => {
-  if (playerNameEl) playerNameEl.textContent = data.name || "";
-  if (cashEl) cashEl.textContent = data.cash;
-  if (totalValueEl) totalValueEl.textContent = data.totalValue;
+function updateChart(newNetWorth) {
+    if (!netWorthChart) return;
+    const now = new Date();
+    netWorthHistory.push({ time: now, value: newNetWorth });
+    const oneMinuteAgo = now.getTime() - 60000;
+    netWorthHistory = netWorthHistory.filter(point => point.time.getTime() > oneMinuteAgo);
+    netWorthChart.data.labels = netWorthHistory.map(p => p.time);
+    netWorthChart.data.datasets[0].data = netWorthHistory.map(p => p.value);
+    netWorthChart.update('none');
+}
 
-  if (!hasSubmittedName) {
-    showJoinState();
-    return;
-  }
-
-  if (data.isActive && data.isGameOpen) {
-    showGameState();
-  } else {
-    showWaitingState();
-  }
-
-  // Met à jour l'affichage des actions possédées par le joueur
-  if (data.portfolio) { // Changed from data.shares to data.portfolio
-    for (const actionName in data.portfolio) { // Changed from data.shares to data.portfolio
-      const sharesSpan = document.getElementById(`shares-${actionName}`);
-      if (sharesSpan) {
-        sharesSpan.textContent = `Vous possédez: ${data.portfolio[actionName]} actions`; // Changed from data.shares to data.portfolio
-      }
+// --- Socket Event Handlers ---
+socket.on('connect', () => {
+    if (!hasSubmittedName) {
+        showState('join');
     }
-  }
+});
+
+socket.on('player:joined', (data) => {
+    if (data.isGameOpen) {
+        showState('game');
+        initializeChart();
+    } else {
+        showState('waiting');
+    }
+});
+
+socket.on('game:open', () => {
+    if (hasSubmittedName) {
+        showState('game');
+        initializeChart();
+    }
+});
+
+socket.on('player:update', data => {
+    playerNameDisplay.textContent = data.name || "Player";
+    netWorthDisplay.textContent = `${data.totalValue.toLocaleString()} €`;
+    walletDisplay.textContent = `Wallet: ${data.cash.toLocaleString()} €`;
+    currentPlayerCash = data.cash;
+    updateChart(data.totalValue);
+
+    document.querySelectorAll('.action-card').forEach(card => {
+        const actionName = card.dataset.actionName;
+        const portfolioEntry = data.portfolio ? data.portfolio[actionName] : undefined;
+
+        const quantityOwned = portfolioEntry ? portfolioEntry.quantity : 0;
+        const invested = (portfolioEntry && portfolioEntry.invested) || 0;
+
+        // --- THE DEFINITIVE FIX FOR THE NaN BUG ---
+        const parsedPrice = parseFloat(card.dataset.currentPrice);
+        const currentPrice = isNaN(parsedPrice) ? 0 : parsedPrice;
+        // --- END FIX ---
+
+        const currentValue = currentPrice * quantityOwned;
+        const gainLoss = currentValue - invested;
+
+        card.querySelector('.action-total-value').textContent = `${currentValue.toLocaleString()} €`;
+        card.querySelector('.details-quantity').textContent = quantityOwned;
+        card.querySelector('.details-invested').textContent = invested.toLocaleString() + '€';
+        
+        const gainLossEl = card.querySelector('.details-gain-loss');
+        gainLossEl.textContent = gainLoss.toFixed(2) + '€';
+        gainLossEl.style.color = gainLoss >= 0 ? '#6eff92' : '#ff5757';
+
+
+        card.querySelectorAll('button[data-action="sell"]').forEach(button => {
+            const quantityToSell = parseInt(button.dataset.quantity);
+            const canSell = quantityToSell <= quantityOwned;
+            button.disabled = !canSell;
+            button.classList.toggle('can-sell', canSell);
+        });
+
+        card.querySelectorAll('button[data-action="buy"]').forEach(button => {
+            const quantityToBuy = parseInt(button.dataset.quantity);
+            button.disabled = (currentPrice * quantityToBuy) > currentPlayerCash;
+        });
+    });
+});
+
+socket.on('game:update', data => {
+    if (!Array.isArray(data.actions)) return;
+
+    if (actionsContainer.children.length === 0 && data.actions.length > 0) {
+        actionsContainer.innerHTML = '';
+        data.actions.forEach(action => {
+            const card = createActionCard(action);
+            actionsContainer.appendChild(card);
+        });
+    } else {
+        data.actions.forEach(action => {
+            const card = document.querySelector(`.action-card[data-action-name="${action.name}"]`);
+            if (card) {
+                const newPrice = action.currentPrice;
+
+                let priceHistory = card.dataset.priceHistory ? JSON.parse(card.dataset.priceHistory) : [];
+                const now = Date.now();
+                priceHistory.push({ time: now, price: newPrice });
+                const tenSecondsAgo = now - 10000;
+                priceHistory = priceHistory.filter(p => p.time >= tenSecondsAgo);
+                card.dataset.priceHistory = JSON.stringify(priceHistory);
+                
+                const oldPriceDataPoint = priceHistory[0];
+                const oldPrice = oldPriceDataPoint ? oldPriceDataPoint.price : newPrice;
+
+                card.dataset.currentPrice = newPrice;
+
+                card.querySelector('.action-value').textContent = `${newPrice.toLocaleString()} €`;
+                card.querySelector('.action-price-reminder').textContent = `Current Price: ${newPrice.toLocaleString()} €`;
+
+                const tendencyDiv = card.querySelector('.action-tendency');
+                if (tendencyDiv) {
+                    const tendency = oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice) * 100 : 0;
+                    tendencyDiv.classList.remove('up', 'down');
+                    let arrow = '';
+                    if (tendency > 0.01) {
+                        tendencyDiv.classList.add('up');
+                        arrow = ' ▲';
+                    } else if (tendency < -0.01) {
+                        tendencyDiv.classList.add('down');
+                        arrow = ' ▼';
+                    }
+                    tendencyDiv.textContent = `${tendency.toFixed(2)}%${arrow}`;
+                }
+
+                card.querySelectorAll('button[data-action="buy"]').forEach(button => {
+                    const quantityToBuy = parseInt(button.dataset.quantity);
+                    button.disabled = (newPrice * quantityToBuy) > currentPlayerCash;
+                });
+            }
+        });
+    }
+});
+
+// --- UI Creation and Interaction ---
+function createActionCard(action) {
+    const card = document.createElement('div');
+    card.className = 'action-card';
+    card.dataset.actionName = action.name;
+    card.dataset.currentPrice = action.currentPrice;
+    card.dataset.priceHistory = JSON.stringify([]);
+
+    card.innerHTML = `
+        <div class="action-header">
+            <div>
+                <div class="action-name">${action.shortName}</div>
+                <div class="action-value">${action.currentPrice.toLocaleString()} €</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="action-total-value">0 €</div>
+                <div class="action-tendency">0.00%</div>
+            </div>
+        </div>
+        <div class="action-details">
+            <div class="details-grid">
+                <div class="details-item">
+                    <div class="details-label">Owned</div>
+                    <div class="details-value details-quantity">0</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Invested</div>
+                    <div class="details-value details-invested">0€</div>
+                </div>
+                <div class="details-item">
+                    <div class="details-label">Gain/Loss</div>
+                    <div class="details-value details-gain-loss">0.00€</div>
+                </div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <div class="button-row">
+                <button data-action="buy" data-quantity="1">Buy 1</button>
+                <button data-action="buy" data-quantity="5">5</button>
+                <button data-action="buy" data-quantity="25">25</button>
+                <button data-action="buy" data-quantity="100">100</button>
+                <button data-action="buy" data-quantity="1000">1000</button>
+            </div>
+            <div class="button-row">
+                <button class="sell" data-action="sell" data-quantity="1">Sell 1</button>
+                <button class="sell" data-action="sell" data-quantity="5">5</button>
+                <button class="sell" data-action="sell" data-quantity="25">25</button>
+                <button class="sell" data-action="sell" data-quantity="100">100</button>
+                <button class="sell" data-action="sell" data-quantity="1000">1000</button>
+            </div>
+        </div>
+        <div class="action-price-reminder">Current Price: ${action.currentPrice.toLocaleString()} €</div>
+    `;
+
+    card.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            const wasExpanded = card.classList.contains('is-expanded');
+            document.querySelectorAll('.action-card.is-expanded').forEach(c => {
+                c.classList.remove('is-expanded');
+            });
+            if (!wasExpanded) {
+                card.classList.add('is-expanded');
+            }
+        }
+    });
+
+    card.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (button.disabled) return;
+            const { action, quantity } = button.dataset;
+            socket.emit(`player:${action}`, { actionName: card.dataset.actionName, quantity: parseInt(quantity) });
+        });
+    });
+
+    return card;
+}
+
+// --- Initial Setup ---
+document.addEventListener('DOMContentLoaded', () => {
+    showState('join');
+
+    joinButton.addEventListener('click', () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+            alert('Entre un pseudo.');
+            return;
+        }
+        hasSubmittedName = true;
+        socket.emit('player:join', name);
+    });
 });
