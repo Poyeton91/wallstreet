@@ -166,57 +166,70 @@ socket.on('player:update', data => {
 });
 
 socket.on('game:update', data => {
-    if (!Array.isArray(data.actions)) return;
+    socket.on('game:update', data => {
+        if (!Array.isArray(data.actions)) return;
 
-    if (actionsContainer.children.length === 0 && data.actions.length > 0) {
-        actionsContainer.innerHTML = '';
-        data.actions.forEach(action => {
-            const card = createActionCard(action);
-            actionsContainer.appendChild(card);
-        });
-    } else {
-        data.actions.forEach(action => {
-            const card = document.querySelector(`.action-card[data-action-name="${action.name}"]`);
-            if (card) {
-                const newPrice = action.currentPrice;
+        // 1. On liste les noms des actions actuellement affichées sur l'écran du joueur
+        const displayedActions = Array.from(actionsContainer.children).map(card => card.dataset.actionName);
 
-                let priceHistory = card.dataset.priceHistory ? JSON.parse(card.dataset.priceHistory) : [];
-                const now = Date.now();
-                priceHistory.push({ time: now, price: newPrice });
-                const tenSecondsAgo = now - 10000;
-                priceHistory = priceHistory.filter(p => p.time >= tenSecondsAgo);
-                card.dataset.priceHistory = JSON.stringify(priceHistory);
-                
-                const oldPriceDataPoint = priceHistory[0];
-                const oldPrice = oldPriceDataPoint ? oldPriceDataPoint.price : newPrice;
+        // 2. On liste les noms des actions envoyées par le serveur
+        const serverActions = data.actions.map(a => a.name);
 
-                card.dataset.currentPrice = newPrice;
+        // 3. On compare les deux listes
+        const isDifferent = displayedActions.join(',') !== serverActions.join(',');
 
-                card.querySelector('.action-value').textContent = `${newPrice.toLocaleString()} €`;
-                card.querySelector('.action-price-reminder').textContent = `Current Price: ${newPrice.toLocaleString()} €`;
+        // Si le tirage a changé (l'admin a cliqué sur Ouvrir), on FORCE la recréation des cartes
+        if (isDifferent) {
+            actionsContainer.innerHTML = '';
+            data.actions.forEach(action => {
+                const card = createActionCard(action);
+                actionsContainer.appendChild(card);
+            });
+        }
+        // Sinon, on se contente de mettre à jour les prix de manière fluide
+        else {
+            data.actions.forEach(action => {
+                const card = document.querySelector(`.action-card[data-action-name="${action.name}"]`);
+                if (card) {
+                    const newPrice = action.currentPrice;
 
-                const tendencyDiv = card.querySelector('.action-tendency');
-                if (tendencyDiv) {
-                    const tendency = oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice) * 100 : 0;
-                    tendencyDiv.classList.remove('up', 'down');
-                    let arrow = '';
-                    if (tendency > 0.01) {
-                        tendencyDiv.classList.add('up');
-                        arrow = ' ▲';
-                    } else if (tendency < -0.01) {
-                        tendencyDiv.classList.add('down');
-                        arrow = ' ▼';
+                    let priceHistory = card.dataset.priceHistory ? JSON.parse(card.dataset.priceHistory) : [];
+                    const now = Date.now();
+                    priceHistory.push({ time: now, price: newPrice });
+                    const tenSecondsAgo = now - 10000;
+                    priceHistory = priceHistory.filter(p => p.time >= tenSecondsAgo);
+                    card.dataset.priceHistory = JSON.stringify(priceHistory);
+
+                    const oldPriceDataPoint = priceHistory[0];
+                    const oldPrice = oldPriceDataPoint ? oldPriceDataPoint.price : newPrice;
+
+                    card.dataset.currentPrice = newPrice;
+
+                    card.querySelector('.action-value').textContent = `${newPrice.toLocaleString()} €`;
+                    card.querySelector('.action-price-reminder').textContent = `Current Price: ${newPrice.toLocaleString()} €`;
+
+                    const tendencyDiv = card.querySelector('.action-tendency');
+                    if (tendencyDiv) {
+                        const tendency = oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice) * 100 : 0;
+                        tendencyDiv.classList.remove('up', 'down');
+                        let arrow = '';
+                        if (tendency > 0.01) {
+                            tendencyDiv.classList.add('up');
+                            arrow = ' ▲';
+                        } else if (tendency < -0.01) {
+                            tendencyDiv.classList.add('down');
+                            arrow = ' ▼';
+                        }
+                        tendencyDiv.textContent = `${tendency.toFixed(2)}%${arrow}`;
                     }
-                    tendencyDiv.textContent = `${tendency.toFixed(2)}%${arrow}`;
-                }
 
-                card.querySelectorAll('button[data-action="buy"]').forEach(button => {
-                    const quantityToBuy = parseInt(button.dataset.quantity);
-                    button.disabled = (newPrice * quantityToBuy) > currentPlayerCash;
-                });
-            }
-        });
-    }
+                    card.querySelectorAll('button[data-action="buy"]').forEach(button => {
+                        const quantityToBuy = parseInt(button.dataset.quantity);
+                        button.disabled = (newPrice * quantityToBuy) > currentPlayerCash;
+                    });
+                }
+            });
+        }
 
     //MISE À JOUR DU LEADERBOARD
 
@@ -225,6 +238,7 @@ socket.on('game:update', data => {
         // On sauvegarde le classement pour calculer les flèches à la seconde suivante
         previousLeaderboard = data.leaderboard;
     }
+    });
 });
 
 // --- UI Creation and Interaction ---
@@ -238,7 +252,11 @@ function createActionCard(action) {
     card.innerHTML = `
         <div class="action-header">
             <div>
-                <div class="action-name">${action.shortName}</div>
+                <div class="action-name">
+                    <span class="nom-long">${action.name}</span>
+                    <span class="nom-court">(${action.shortName})</span>
+                    
+                </div>
                 <div class="action-value">${action.currentPrice.toLocaleString()} €</div>
             </div>
             <div style="text-align: right;">
