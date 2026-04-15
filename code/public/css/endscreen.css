@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+
+body {
+    margin: 0;
+    padding: 40px;
+    background: #0f172a; /* Fond sombre élégant */
+    color: white;
+    font-family: 'Lilita One', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.end-title {
+    text-align: center;
+    font-size: 64px;
+    margin: 0 0 40px 0;
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    letter-spacing: 4px;
+}
+
+.end-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr 350px;
+    gap: 40px;
+    flex: 1;
+}
+
+.end-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    border-left: 6px solid #6eff92;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.stat-card h3 { margin: 0 0 5px 0; font-size: 24px; color: #e0e0e0; }
+.stat-card p { margin: 0; font-size: 20px; font-weight: normal; color: white;}
+
+.stat-desc {
+    margin: 0 0 10px 0 !important; /* Marge sous la description */
+    font-size: 16px !important;
+    color: #9ca3af !important; /* Gris clair */
+    font-family: Arial, sans-serif; /* Une police plus classique pour la description */
+    font-style: italic;
+}
+
+.stat-card p[id$="-text"] {
+    margin: 0;
+    font-size: 22px;
+    color: white;
+}
+
+.stat-poorest { border-left-color: #ff5757; }
+#stat-falloff { border-left-color: #ffaa00; }
+#stat-nemesis { border-left-color: #a855f7; }
+
+/* Podium central */
+.end-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.podium-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 15px;
+    height: 400px;
+}
+
+.podium-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 160px;
+    transition: opacity 1s ease, transform 1s ease;
+}
+
+.podium-block {
+    width: 100%;
+    background: linear-gradient(180deg, #658bff 0%, #3b5cbd 100%);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: white;
+    box-shadow: 0 -5px 20px rgba(101, 139, 255, 0.4);
+}
+
+.step-1 .podium-block { height: 250px; background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%); box-shadow: 0 -5px 30px rgba(255, 215, 0, 0.5); }
+.step-2 .podium-block { height: 180px; background: linear-gradient(180deg, #e0e0e0 0%, #9e9e9e 100%); }
+.step-3 .podium-block { height: 130px; background: linear-gradient(180deg, #cd7f32 0%, #8b4513 100%); }
+
+.podium-name { font-size: 28px; text-align: center; margin-bottom: 5px; white-space: nowrap; }
+.podium-score { font-size: 20px; color: #6eff92; margin-bottom: 15px; font-family: Arial, sans-serif; font-weight: bold;}
+.crown-big { font-size: 60px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); }
+
+.podium-others {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 26px;
+    color: #e0e0e0;
+    transition: opacity 1s ease;
+}
+.podium-others p { margin: 5px 0; }
+
+/* Animations de révélation */
+.hidden-step {
+    opacity: 0;
+    transform: translateY(30px);
+}

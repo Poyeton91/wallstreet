@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats - Le Rat de Wall Street</title>
+    <link rel="stylesheet" href="/css/endscreen.css">
+</head>
+<body>
+<h1 class="end-title">FIN DE LA PARTIE</h1>
+
+<div class="end-grid">
+    <div class="end-side">
+        <div id="stat-frenetic" class="stat-card hidden-step">
+            <h3>🐺 Le Loup de Wall Street</h3>
+            <p class="stat-desc">Celui qui a fait le plus d'achats et de ventes.</p>
+            <p id="frenetic-text">...</p>
+        </div>
+        <div id="stat-squirrel" class="stat-card hidden-step">
+            <h3>🐿️ L'Écureuil</h3>
+            <p class="stat-desc">Celui qui a gardé le plus de cash non investi sous le matelas.</p>
+            <p id="squirrel-text">...</p>
+        </div>
+        <div id="stat-rat" class="stat-card hidden-step">
+            <h3>🧀 Le Rat de Wall Street</h3>
+            <p class="stat-desc">Le plus gros radin, qui a investi le moins d'argent possible.</p>
+            <p id="rat-text">...</p>
+        </div>
+        <div id="stat-nemesis" class="stat-card hidden-step">
+            <h3>⚔️ Les Némésis</h3>
+            <p class="stat-desc">Le duel épique : les joueurs qui se sont doublés le plus de fois.</p>
+            <p id="nemesis-text">...</p>
+        </div>
+    </div>
+
+    <div class="end-center">
+        <div class="podium-container">
+            <div id="podium-2" class="podium-step step-2 hidden-step">
+                <div class="podium-name" id="p2-name">-</div>
+                <div class="podium-score" id="p2-score">-</div>
+                <div class="podium-block">2</div>
+            </div>
+            <div id="podium-1" class="podium-step step-1 hidden-step">
+                <span class="crown-big">👑</span>
+                <div class="podium-name" id="p1-name">-</div>
+                <div class="podium-score" id="p1-score">-</div>
+                <div class="podium-block">1</div>
+            </div>
+            <div id="podium-3" class="podium-step step-3 hidden-step">
+                <div class="podium-name" id="p3-name">-</div>
+                <div class="podium-score" id="p3-score">-</div>
+                <div class="podium-block">3</div>
+            </div>
+        </div>
+
+        <div id="podium-others" class="podium-others hidden-step">
+            <p id="p4-text">4ème : -</p>
+            <p id="p5-text">5ème : -</p>
+        </div>
+    </div>
+
+    <div class="end-side">
+        <div id="stat-remontada" class="stat-card hidden-step">
+            <h3>🚀 La Remontada</h3>
+            <p class="stat-desc">Le retour inattendu ! Celui qui a gagné le plus de places.</p>
+            <p id="remontada-text">...</p>
+        </div>
+        <div id="stat-falloff" class="stat-card hidden-step">
+            <h3>📉 La Pire Chute</h3>
+            <p class="stat-desc">Il était Top 1, il a fini au fond du trou.</p>
+            <p id="falloff-text">...</p>
+        </div>
+        <div id="stat-poorest" class="stat-card stat-poorest hidden-step">
+            <h3>🗑️ Le Plus Pauvre</h3>
+            <p class="stat-desc">Ne lui confiez jamais votre argent.</p>
+            <p id="poorest-text">...</p>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/endscreen.js"></script>
+</body>
+</html>

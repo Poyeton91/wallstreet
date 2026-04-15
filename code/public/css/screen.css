@@ -1,124 +1,192 @@
-/* ===== STYLE REPRIS DU VUE.JS DE TON AMI ===== */
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+
 body {
     margin: 0;
     padding: 0;
-    background: #9db5ff; /* On s'assure que le fond global est bleu */
+    background: #9db5ff;
 }
 
 .screen-page {
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background: #9db5ff;
     display: grid;
-    grid-template-columns: 1fr 260px;
+    /* Largeur augmentée à 350px pour laisser de la place au leaderboard */
+    grid-template-columns: minmax(0, 1fr) 350px;
     gap: 20px;
     padding: 20px;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Lilita One', sans-serif;
 }
 
 .screen-main {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* ... précédents blocs body / .screen-page / .screen-main / etc. ... */
+
+/* --- Nouveau bloc pour la structure des news avec icônes --- */
+.news-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* On pousse tout le bloc vers la droite pour faire de la place à l'image */
+    margin-left: 55px;
+    /* On réduit la largeur d'autant pour ne pas déborder à droite */
+    width: calc(100% - 55px);
+    min-height: 110px;
+    margin-bottom: 20px;
 }
 
 .alert-box {
     background: #fff4f4;
     border: 10px solid #ff7b7b;
     border-radius: 24px;
-    padding: 18px 24px;
+    /* IMPORTANT : padding: HAUT DROITE BAS GAUCHE */
+    /* On met 80px à gauche pour que le texte recule et ne soit pas mangé par l'image */
+    padding: 18px 24px 18px 80px;
     font-size: 28px;
     font-weight: bold;
     color: #111;
     text-align: center;
-
-    /* NOUVEAU : On fixe la taille pour éviter que l'écran saute */
+    width: 100%;
+    box-sizing: border-box;
     min-height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease; /* Transition douce pour les couleurs */
+    transition: all 0.3s ease;
+}
+
+/* --- Conteneur de l'image (nettoyé et agrandi) --- */
+.news-icon-container {
+    position: absolute;
+    /* L'image ressort de 55px sur la gauche, compensant exactement le margin-left au-dessus ! */
+    left: -55px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-15deg);
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* --- L'image en elle-même --- */
+#news-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Assure que ton image garde ses belles proportions */
+    display: block;
 }
 
 .chart-box {
     background: #f4f4f4;
     border-radius: 24px;
-    min-height: 500px;
     padding: 24px;
     color: #111;
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .market-chart-wrap {
+    position: relative;
     width: 100%;
     height: 100%;
-    min-height: 450px;
-    position: relative;
+    flex: 1;
+    min-height: 0;
 }
 
 .screen-side {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
 }
 
 .timer-box {
-    background: #111;
+    background: #658bff;
     color: white;
     border-radius: 22px;
     padding: 20px;
     text-align: center;
-}
-
-.timer-title {
-    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;
 }
 
 .timer-value {
-    display: block;
-    margin-top: 10px;
-    font-size: 32px;
+    font-size: 72px; /* Encore un peu plus gros pour remplir la zone */
+    margin: 0;
+    font-weight: 900;
 }
 
 .leaderboard-box {
     flex: 1;
-    background: #ff5b5b;
+    background: #658bff;
     border-radius: 28px;
     padding: 20px;
-    color: #111;
+    color: white;
+    overflow-y: hidden; /* Évite les scrollbars moches sur l'écran public */
 }
 
 .leaderboard-box h2 {
     margin-top: 0;
     text-align: center;
     color: white;
+    font-size: 32px;
 }
 
-.leader-row {
+.lb-row {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin-top: 12px;
-    font-size: 20px;
-    font-weight: bold;
+    align-items: center;
+    font-size: 26px; /* Texte agrandi pour la lisibilité à distance */
+    margin: 14px 0;
+    color: white;
 }
 
-/* Animation pour le stress de la dernière minute */
+.lb-rank {
+    width: 70px;
+    text-align: left;
+}
+
+.lb-name {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 15px;
+}
+
+.lb-score {
+    width: 130px; /* Plus d'espace pour les gros montants et le symbole € */
+    text-align: right;
+}
+
+/* Couleurs des indicateurs de progression */
+.trend-up { color: #6eff92; }
+.trend-down { color: #ff5757; }
+.trend-eq { color: #e0e0e0; }
+.crown { color: #ffe600; text-shadow: 0 0 5px rgba(255, 230, 0, 0.5); }
+
+/* Animation Stress */
 @keyframes blink-red {
     0% { opacity: 1; color: #ff0000; transform: scale(1); }
-    50% { opacity: 0.5; color: #ff5555; transform: scale(1.1); }
+    50% { opacity: 0.5; color: #ff5555; transform: scale(1.05); }
     100% { opacity: 1; color: #ff0000; transform: scale(1); }
 }
 
 .timer-stress {
     animation: blink-red 0.5s infinite;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-}
-
-/* On s'assure que le bloc de news ne bouge pas */
-.alert-box {
-    min-height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
 }

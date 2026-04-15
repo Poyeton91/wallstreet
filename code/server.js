@@ -24,14 +24,14 @@ const EXPECTED_PLAYERS = 26;
 
 // ===== INITIALISATION DU MARCHÉ =====
 const actionTemplates = [
-    { name: "Gogole", shortName: "GGL", initialPrice: 100, sector: "tech" },
-    { name: "Microdoux", shortName: "MSFT", initialPrice: 120, sector: "tech" },
-    { name: "Pomme", shortName: "AAPL", initialPrice: 150, sector: "tech" },
-    { name: "FesseBouc", shortName: "FB", initialPrice: 100, sector: "tech" },
-    { name: "Amazone", shortName: "AMZN", initialPrice: 200, sector: "tech" },
-    { name: "Hessla", shortName: "TSLA", initialPrice: 180, sector: "auto" },
-    { name: "Netflics", shortName: "NFLX", initialPrice: 130, sector: "tech" },
-    { name: "ManqueDo", shortName: "MCD", initialPrice: 100, sector: "food" }
+    { name: "Google", shortName: "GGL", initialPrice: 100, sector: "tech" },
+    { name: "Microsoft", shortName: "MSFT", initialPrice: 120, sector: "tech" },
+    { name: "Apple", shortName: "AAPL", initialPrice: 150, sector: "tech" },
+    { name: "FaceBook", shortName: "META", initialPrice: 100, sector: "tech" },
+    { name: "Amazon", shortName: "AMZN", initialPrice: 200, sector: "tech" },
+    { name: "Tesla", shortName: "TSLA", initialPrice: 180, sector: "auto" },
+    { name: "Netflix", shortName: "NFLX", initialPrice: 130, sector: "tech" },
+    { name: "Macdonalds", shortName: "MCDO", initialPrice: 100, sector: "food" }
 ];
 
 function getNumActionsForPlayers(players) {
@@ -93,6 +93,14 @@ io.on("connection", socket => {
     });
 
     socket.on("admin:open-game", () => {
+        // Si le jeu était fermé, c'est une nouvelle partie : on relance les dés !
+        if (!gameLoop.isGameOpen) {
+            console.log("--- NOUVELLE PARTIE : Génération des actions ---");
+            const newActions = createRandomActions(); // On refait un tirage
+            gameLoop.reset(newActions); // On nettoie les joueurs et on injecte le tirage
+        }
+
+        // On lance le chrono et le marché
         gameLoop.start();
     });
 

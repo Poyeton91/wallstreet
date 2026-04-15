@@ -147,11 +147,6 @@ input {
   gap: 18px;
 }
 
-.lobby-title {
-  margin: 0;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-}
 
 .qr-wrapper {
   background: rgba(255, 255, 255, 0.96);
@@ -198,4 +193,23 @@ input {
     min-width: 0;
     width: 100%;
   }
+}
+
+.lobby-logo {
+  display: block;
+  margin: 0 auto; /* Centre le logo */
+
+  /* Taille réactive : il prendra au maximum 300px, mais se réduira sur petit écran */
+  max-width: 100%;
+  width: 300px; /* À ajuster selon la forme de ton logo (carré ou rectangle) */
+  height: auto;
+
+  /* On recrée l'ombre stylée que tu avais sur ton texte */
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
+}
+
+/* On retire l'ombre du texte (inutile maintenant) sur le conteneur parent */
+.lobby-title {
+  margin: 0;
+  /* Optionnel : tu peux supprimer ou commenter la ligne text-shadow existante ici */
 }

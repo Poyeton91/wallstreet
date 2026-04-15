@@ -23,6 +23,7 @@ new QRCode(qrCodeContainer, {
 
 openGameButton.addEventListener("click", () => {
     socket.emit("admin:open-game");
+    window.open("/screen.html", "_blank");
 });
 
 closeGameButton.addEventListener("click", () => {
@@ -78,3 +79,4 @@ function startSlideshow() {
 }
 
 loadLobbyBackgrounds();
+
