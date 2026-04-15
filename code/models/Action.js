@@ -21,7 +21,7 @@ class Action {
     tick() {
         // 1. BRUIT MICRO : Frénésie de chaque seconde
         // Beaucoup plus fluctuant : on passe à un impact de ±5.0 par seconde !
-        const microNoise = (Math.random() * 2 - 1) * 5.0;
+        const microNoise = (Math.random() * 2 - 1) * 15.0;
 
         // 2. BRUIT MACRO : Tendance sur 2 à 6 secondes
         // On augmente légèrement aussi pour que les vagues soient visibles

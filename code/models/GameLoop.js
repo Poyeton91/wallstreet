@@ -1,47 +1,50 @@
 const NewsManager = require('./NewsManager');
 
 class GameLoop {
-    /**
-     * @param {Action[]} actions Tableau des actions gérées par la boucle de jeu.
-     * @param {object} io L'instance Socket.IO pour la communication.
-     * @param {number} expectedPlayers Nombre de joueurs attendus dans la partie.
-     */
     constructor(actions, io, expectedPlayers = 1) {
         this.actions = actions;
         this.io = io;
         this.expectedPlayers = expectedPlayers;
         this.players = {};
         this.interval = null;
-        
-        // Initialisation du gestionnaire de news
+        this.isGameOpen = false;
+
         this.newsManager = new NewsManager();
-        this.tickCount = 0; // Compteur pour déclencher des events
+        this.tickCount = 0;
     }
 
-    /**
-     * Démarre la boucle de jeu.
-     */
     start() {
-        if (this.interval) return;
-        this.interval = setInterval(() => this.tick(), 1000);
+        if (this.isGameOpen) return;
+        this.isGameOpen = true;
+
+        for (const player of Object.values(this.players)) {
+            if (player.hasJoined) player.isActive = true;
+        }
+
+        if (!this.interval) {
+            this.interval = setInterval(() => this.tick(), 1000);
+        }
+        this.broadcastGameState();
     }
 
-    /**
-     * Arrête la boucle de jeu.
-     */
     stop() {
-        clearInterval(this.interval);
-        this.interval = null;
+        this.isGameOpen = false;
+        for (const player of Object.values(this.players)) {
+            if (player.hasJoined) player.isActive = false;
+        }
+
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.broadcastGameState();
     }
 
-    /**
-     * Logique exécutée à chaque seconde.
-     */
     tick() {
         this.tickCount++;
         let activeNewsEvent = null;
 
-        // Toutes les X secondes (ex: 10), on essaie de générer une news
+        // Toutes les 10 secondes, on essaie de générer une news
         if (this.tickCount % 10 === 0) {
             activeNewsEvent = this.newsManager.generateNews(this.actions);
             if (activeNewsEvent) {
@@ -49,122 +52,171 @@ class GameLoop {
             }
         }
 
-        this.actions.forEach(action => {
-            // Appliquer le tick de l'action qui gère maintenant son propre prix
-            action.tick();
-        });
+        // Fait vivre chaque action
+        this.actions.forEach(action => action.tick());
 
-        // 3. Envoyer le nouvel état du jeu à tous les clients, en incluant la news si elle vient de pop
         this.broadcastGameState(activeNewsEvent);
     }
 
-    /**
-     * Gère la connexion d'un nouveau joueur.
-     */
-    addPlayer(socket, playerName) {
-        this.players[socket.id] = {
-            id: socket.id,
-            name: playerName || `Joueur ${socket.id.substring(0, 4)}`,
+    createPlayer(socketId) {
+        const portfolio = {};
+        this.actions.forEach(action => {
+            portfolio[action.name] = { quantity: 0, invested: 0 };
+        });
+
+        this.players[socketId] = {
+            id: socketId,
+            name: "",
             cash: 10000,
-            shares: {} // { actionName: quantity }
+            portfolio,
+            hasJoined: false,
+            isActive: false
         };
+
+        this.emitPlayerState(socketId);
+        this.emitLobbyState();
+    }
+
+    joinPlayer(socketId, playerName) {
+        const player = this.players[socketId];
+        if (!player) return;
+
+        player.name = (playerName || "Joueur").trim() || "Joueur";
+        player.hasJoined = true;
+        player.isActive = this.isGameOpen;
+
+        this.io.to(socketId).emit("player:joined", {
+            isGameOpen: this.isGameOpen,
+            isWaiting: !this.isGameOpen
+        });
+
         this.broadcastGameState();
     }
 
-    /**
-     * Gère la déconnexion d'un joueur.
-     */
-    removePlayer(socket) {
-        const player = this.players[socket.id];
-        if (player) {
-            // No need to "sell" actions from the market perspective, just remove from player's portfolio
-            // The market price is independent of player actions now.
-        }
-        delete this.players[socket.id];
+    removePlayer(socketId) {
+        delete this.players[socketId];
         this.broadcastGameState();
     }
 
-    /**
-     * Gère l'achat d'une action par un joueur.
-     */
-    buyAction(socket, actionShortName, quantity = 1) { // Changed parameter name to actionShortName
-        const player = this.players[socket.id];
-        const action = this.actions.find(a => a.shortName === actionShortName); // Changed lookup to shortName
+    buyAction(socketId, actionIdentifier, quantity) {
+        const player = this.players[socketId];
+        if (!player || !player.isActive || !this.isGameOpen) return;
 
-        if (!player || !action) return;
+        const action = this.actions.find(a => a.name === actionIdentifier || a.shortName === actionIdentifier);
+        if (!action) return;
 
-        const totalPrice = action.price * quantity;
+        const cost = action.price * quantity;
+        if (player.cash < cost) return;
 
-        if (player.cash >= totalPrice) {
-            player.cash -= totalPrice;
-            player.shares[actionShortName] = (player.shares[actionShortName] || 0) + quantity; // Use shortName for shares key
-            this.broadcastGameState();
+        player.cash -= cost;
+
+        if (!player.portfolio[action.name]) {
+            player.portfolio[action.name] = { quantity: 0, invested: 0 };
         }
+        player.portfolio[action.name].quantity += quantity;
+        player.portfolio[action.name].invested += cost;
+
+        this.broadcastGameState();
     }
 
-    /**
-     * Gère la vente d'une action par un joueur.
-     */
-    sellAction(socket, actionShortName, quantity = 1) { // Changed parameter name to actionShortName
-        const player = this.players[socket.id];
-        const action = this.actions.find(a => a.shortName === actionShortName); // Changed lookup to shortName
+    sellAction(socketId, actionIdentifier, quantity) {
+        const player = this.players[socketId];
+        if (!player || !player.isActive || !this.isGameOpen) return;
 
-        if (!player || !action) return;
+        const action = this.actions.find(a => a.name === actionIdentifier || a.shortName === actionIdentifier);
+        if (!action) return;
 
-        if ((player.shares[actionShortName] || 0) >= quantity) { // Use shortName for shares key
-            player.shares[actionShortName] -= quantity;
-            player.cash += action.price * quantity;
-            this.broadcastGameState();
+        const ownedQuantity = player.portfolio[action.name]?.quantity || 0;
+        if (ownedQuantity < quantity) return;
+
+        const avgCost = player.portfolio[action.name].invested / ownedQuantity;
+
+        player.portfolio[action.name].quantity -= quantity;
+        player.portfolio[action.name].invested -= avgCost * quantity;
+        player.cash += action.price * quantity;
+
+        if (player.portfolio[action.name].quantity === 0) {
+            player.portfolio[action.name].invested = 0;
         }
+
+        this.broadcastGameState();
     }
 
-    /**
-     * Calcule le classement des joueurs.
-     */
+    getPlayerTotalValue(player) {
+        let total = player.cash;
+        for (const action of this.actions) {
+            const qty = player.portfolio[action.name]?.quantity || 0;
+            total += qty * action.price;
+        }
+        return total;
+    }
+
     getLeaderboard() {
         return Object.values(this.players)
-            .map(player => {
-                let sharesValue = 0;
-                for (const actionShortName in player.shares) { // Changed actionName to actionShortName
-                    const action = this.actions.find(a => a.shortName === actionShortName); // Changed lookup to shortName
-                    if (action) {
-                        sharesValue += player.shares[actionShortName] * action.price;
-                    }
-                }
-                return {
-                    id: player.id,
-                    name: player.name,
-                    totalValue: Math.round(player.cash + sharesValue)
-                };
-            })
+            .filter(p => p.hasJoined)
+            .map(p => ({
+                id: p.id,
+                name: p.name,
+                cash: p.cash,
+                portfolio: p.portfolio,
+                totalValue: this.getPlayerTotalValue(p)
+            }))
             .sort((a, b) => b.totalValue - a.totalValue);
     }
 
-    /**
-     * Diffuse l'état complet du jeu à tous les clients.
-     * @param {Object} newsEvent News à afficher (optionnelle)
-     */
+    getPublicActions() {
+        return this.actions.map(action => ({
+            name: action.name,
+            shortName: action.shortName,
+            sector: action.sector,
+            currentPrice: action.price, // On traduit "price" de la classe en "currentPrice" pour le front
+            history: action.history
+        }));
+    }
+
+    emitLobbyState() {
+        const playersArr = Object.values(this.players);
+        const waitingCount = playersArr.filter(p => p.hasJoined && !p.isActive).length;
+        const activeCount = playersArr.filter(p => p.hasJoined && p.isActive).length;
+
+        this.io.emit("lobby:update", {
+            isGameOpen: this.isGameOpen,
+            waitingCount,
+            activeCount
+        });
+    }
+
+    emitPlayerState(socketId) {
+        const player = this.players[socketId];
+        if (!player) return;
+
+        this.io.to(socketId).emit("player:update", {
+            name: player.name,
+            cash: player.cash,
+            portfolio: player.portfolio,
+            actions: this.getPublicActions(),
+            totalValue: this.getPlayerTotalValue(player),
+            isGameOpen: this.isGameOpen,
+            isWaiting: player.hasJoined && !player.isActive,
+            isActive: player.isActive
+        });
+    }
+
     broadcastGameState(newsEvent = null) {
-        // État global pour l'écran principal
+        // Envoi aux écrans publics
         this.io.emit("game:update", {
-            actions: this.actions.map(a => ({
-                name: a.name,
-                shortName: a.shortName,
-                price: a.price,
-                history: a.history
-            })),
+            isGameOpen: this.isGameOpen,
+            actions: this.getPublicActions(),
             leaderboard: this.getLeaderboard(),
-            newsEvent: newsEvent // On passe la news ici
+            newsEvent
         });
 
-        // État spécifique pour chaque joueur
-        for (const playerId in this.players) {
-            const player = this.players[playerId];
-            this.io.to(playerId).emit("player:update", {
-                name: player.name,
-                cash: player.cash,
-                shares: player.shares,
-            });
+        // Mise à jour du lobby
+        this.emitLobbyState();
+
+        // Envoi spécifique aux téléphones des joueurs
+        for (const socketId in this.players) {
+            this.emitPlayerState(socketId);
         }
     }
 }

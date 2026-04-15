@@ -71,7 +71,10 @@ function updateChart(newNetWorth) {
 
 // --- Socket Event Handlers ---
 socket.on('connect', () => {
-    if (!hasSubmittedName) {
+    if (hasSubmittedName) {
+        // Le serveur a redémarré : on le force à nous réinscrire automatiquement
+        socket.emit('player:join', nameInput.value.trim() || "Joueur");
+    } else {
         showState('join');
     }
 });
@@ -100,36 +103,39 @@ socket.on('player:update', data => {
     updateChart(data.totalValue);
 
     document.querySelectorAll('.action-card').forEach(card => {
+        // card.dataset.actionName contient déjà le nom complet (ex: "ManqueDo")
         const actionName = card.dataset.actionName;
-        const portfolioEntry = data.portfolio ? data.portfolio[actionName] : undefined;
 
-        const quantityOwned = portfolioEntry ? portfolioEntry.quantity : 0;
-        const invested = (portfolioEntry && portfolioEntry.invested) || 0;
+        // On récupère directement l'objet du portfolio
+        const portfolioEntry = data.portfolio[actionName];
+        const quantityOwned = portfolioEntry?.quantity || 0;
+        const invested = portfolioEntry?.invested || 0;
 
-        // --- THE DEFINITIVE FIX FOR THE NaN BUG ---
         const parsedPrice = parseFloat(card.dataset.currentPrice);
         const currentPrice = isNaN(parsedPrice) ? 0 : parsedPrice;
-        // --- END FIX ---
 
         const currentValue = currentPrice * quantityOwned;
-        const gainLoss = currentValue - invested;
+        const gainLoss = quantityOwned > 0 ? currentValue - invested : 0;
 
         card.querySelector('.action-total-value').textContent = `${currentValue.toLocaleString()} €`;
         card.querySelector('.details-quantity').textContent = quantityOwned;
         card.querySelector('.details-invested').textContent = invested.toLocaleString() + '€';
-        
+
         const gainLossEl = card.querySelector('.details-gain-loss');
         gainLossEl.textContent = gainLoss.toFixed(2) + '€';
         gainLossEl.style.color = gainLoss >= 0 ? '#6eff92' : '#ff5757';
 
-
+        // --- GESTION DES BOUTONS SELL ---
         card.querySelectorAll('button[data-action="sell"]').forEach(button => {
             const quantityToSell = parseInt(button.dataset.quantity);
-            const canSell = quantityToSell <= quantityOwned;
+            // On peut vendre si on possède au moins la quantité demandée
+            const canSell = quantityOwned >= quantityToSell;
+
             button.disabled = !canSell;
             button.classList.toggle('can-sell', canSell);
         });
 
+        // --- GESTION DES BOUTONS BUY ---
         card.querySelectorAll('button[data-action="buy"]').forEach(button => {
             const quantityToBuy = parseInt(button.dataset.quantity);
             button.disabled = (currentPrice * quantityToBuy) > currentPlayerCash;
