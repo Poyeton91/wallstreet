@@ -3,29 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Écran partagé</title>
+  <title>Écran - Le Rat de Wall Street</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/screen.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<main class="container">
-  <h1>Écran partagé</h1>
+<div class="screen-page">
+  <div class="screen-main">
+    <div class="alert-box" id="alert-box">
+      Pas de news
+    </div>
 
-  <p><strong>État :</strong> <span id="screen-status">Partie fermée</span></p>
-  <p><strong>Prix actuel :</strong> <span id="current-price">0</span> €</p>
-
-  <canvas id="chart" width="800" height="300"></canvas>
-
-  <h2>Classement</h2>
-  <ol id="leaderboard"></ol>
-</main>
-
-  <!-- Nouveau container pour les news en bas de l'écran -->
-  <div id="news-container" class="news-banner hidden">
-    <div id="news-text" class="news-text"></div>
+    <div class="chart-box">
+      <div class="market-chart-wrap">
+        <canvas id="market-chart"></canvas>
+      </div>
+    </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/screen.js"></script>
+  <aside class="screen-side">
+    <div class="timer-box">
+      <strong class="timer-value" id="timer-value">STOP</strong>
+    </div>
+
+    <div class="leaderboard-box">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-container">
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/screen.js"></script>
 </body>
 </html>
