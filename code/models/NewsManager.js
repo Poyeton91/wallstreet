@@ -5,7 +5,7 @@ class NewsManager {
         // 1.0 = Biais proportionnel (une action 2x plus chère a 2x plus de chance d'avoir une mauvaise news)
         // 2.0 = Biais agressif (au carré)
         // 3.0 = Biais extrême (au cube)
-        this.priceBiasIntensity = 3.0;
+        this.priceBiasIntensity = 2.0;
 
         // Liste des news disponibles
         this.newsList = [
@@ -15,7 +15,7 @@ class NewsManager {
                 type: "informative",
                 text: "Rumeur : Une faille de sécurité mineure aurait été découverte chez {COMPANY}.",
                 targetSector: "tech",
-                impactPerSecond: -6.0,
+                impactPerSecond: -8.0,
                 durationInSeconds: 7
             },
             {
@@ -24,31 +24,31 @@ class NewsManager {
                 text: "Fuite de données chez {COMPANY} : Quelques milliers de comptes touchés.",
                 targetSector: "tech",
                 impactPerSecond: -30.0, 
-                durationInSeconds: 4
+                durationInSeconds: 5
             },
             {
                 id: "tech_innovation",
                 type: "positive",
                 text: "Nouvelle mise à jour prometteuse annoncée par {COMPANY}.",
                 targetSector: "tech",
-                impactPerSecond: 15.0,
-                durationInSeconds: 6
+                impactPerSecond: 7.0,
+                durationInSeconds: 12
             },
             {
                 id: "tech_earnings_beat",
                 type: "positive",
                 text: "{COMPANY} dépasse largement les attentes de Wall Street ce trimestre.",
                 targetSector: "tech",
-                impactPerSecond: 20.0,
-                durationInSeconds: 10
+                impactPerSecond: 15.0,
+                durationInSeconds: 14
             },
             {
                 id: "tech_ai_breakthrough",
                 type: "positive",
                 text: "L'intelligence artificielle de {COMPANY} a pris conscience d'elle-même et a optimisé ses impôts. Les marchés adorent !",
                 targetSector: "tech",
-                impactPerSecond: 35.0,
-                durationInSeconds: 6
+                impactPerSecond: 23.0,
+                durationInSeconds: 12
             },
             {
                 id: "tech_ai_breakthrough2",
@@ -56,7 +56,7 @@ class NewsManager {
                 text: "L'intelligence artificielle de {COMPANY} prend plusieurs jours de congé !",
                 targetSector: "tech",
                 impactPerSecond: -5.0,
-                durationInSeconds: 6
+                durationInSeconds: 8
             },
             {
                 id: "tech_ai_breakthrough3",
@@ -71,7 +71,7 @@ class NewsManager {
                 type: "negative",
                 text: "Scandale : le PDG de {COMPANY} a été surpris en train d'insulter des investisseurs sur un forum. L'action dévisse.",
                 targetSector: "tech",
-                impactPerSecond: -25.0,
+                impactPerSecond: -30.0,
                 durationInSeconds: 6
             },
             {
@@ -79,8 +79,8 @@ class NewsManager {
                 type: "positive",
                 text: "Les nouvelles lunettes connectées de {COMPANY} font un carton inattendu chez les influenceurs.",
                 targetSector: "tech",
-                impactPerSecond: 20.0,
-                durationInSeconds: 9
+                impactPerSecond: 10.0,
+                durationInSeconds: 18
             },
             // --- NEWS AUTO ---
             {
@@ -89,15 +89,15 @@ class NewsManager {
                 text: "Rappel massif de véhicules pour {COMPANY} suite à un défaut d'essuie-glace.",
                 targetSector: "auto",
                 impactPerSecond: -25.0,
-                durationInSeconds: 8
+                durationInSeconds: 6
             },
             {
                 id: "auto_sales_record",
                 type: "positive",
                 text: "Les ventes du nouveau modèle de {COMPANY} explosent les records.",
                 targetSector: "auto",
-                impactPerSecond: 30.0,
-                durationInSeconds: 8
+                impactPerSecond: 10.0,
+                durationInSeconds: 20
             },
             {
                 id: "auto_autonomous_crash",
@@ -105,31 +105,31 @@ class NewsManager {
                 text: "Le taxi sans chauffeur de {COMPANY} a percuté une vitrine. Le programme autonome est suspendu.",
                 targetSector: "auto",
                 impactPerSecond: -35.0,
-                durationInSeconds: 4
+                durationInSeconds: 5
             },
             {
                 id: "auto_strike",
                 type: "negative",
                 text: "Grève surprise massive dans les usines de {COMPANY}. Les chaînes de production sont à l'arrêt complet.",
                 targetSector: "auto",
-                impactPerSecond: -15.0,
-                durationInSeconds: 15
+                impactPerSecond: -17.0,
+                durationInSeconds: 10
             },
             {
                 id: "auto_chip_shortage",
                 type: "informative",
                 text: "Pénurie de composants : {COMPANY} repousse la sortie de son nouveau SUV de plusieurs mois.",
                 targetSector: "auto",
-                impactPerSecond: -12.0,
-                durationInSeconds: 6
+                impactPerSecond: -6.0,
+                durationInSeconds: 12
             },
             {
                 id: "auto_mega_contract",
                 type: "positive",
                 text: "{COMPANY} signe un contrat géant pour équiper toute la police de Dubaï avec ses véhicules.",
                 targetSector: "auto",
-                impactPerSecond: 45.0,
-                durationInSeconds: 6
+                impactPerSecond: 30.0,
+                durationInSeconds: 12
             },
             {
                 id: "auto_eco_award",
@@ -147,8 +147,8 @@ class NewsManager {
                 type: "informative",
                 text: "Avis mitigés sur la nouvelle recette proposée par {COMPANY}.",
                 targetSector: "food",
-                impactPerSecond: -12.0,
-                durationInSeconds: 6
+                impactPerSecond: -6.0,
+                durationInSeconds: 12
             },
             {
                 id: "food_health_scandal",
@@ -163,8 +163,8 @@ class NewsManager {
                 type: "positive",
                 text: "Le nouveau menu viral de {COMPANY} attire une foule immense.",
                 targetSector: "food",
-                impactPerSecond: 20.0,
-                durationInSeconds: 6
+                impactPerSecond: 15.0,
+                durationInSeconds: 10
             },
 
             {
@@ -172,8 +172,8 @@ class NewsManager {
                 type: "positive",
                 text: "Le nouveau simili-viande 100% synthétique de {COMPANY} est un triomphe. Les ruptures de stock s'enchaînent.",
                 targetSector: "food",
-                impactPerSecond: 28.0,
-                durationInSeconds: 6
+                impactPerSecond: 20.0,
+                durationInSeconds: 10
             },
             {
                 id: "food_weird_collab",
@@ -197,7 +197,7 @@ class NewsManager {
                 text: "Une vidéo virale montre un rongeur dans les cuisines de {COMPANY}. L'action plonge !",
                 targetSector: "food",
                 impactPerSecond: -45.0,
-                durationInSeconds: 4
+                durationInSeconds: 5
             },
 
             {
@@ -205,7 +205,7 @@ class NewsManager {
                 type: "negative",
                 text: "Grave pénurie de frites chez {COMPANY}. Les clients menacent de boycotter les restaurants.",
                 targetSector: "food",
-                impactPerSecond: -10.0,
+                impactPerSecond: -8.0,
                 durationInSeconds: 12
             },
 
@@ -217,8 +217,8 @@ class NewsManager {
                 type: "informative",
                 text: "Enquête surprise des régulateurs dans les bureaux de {COMPANY}.",
                 targetSector: "finance",
-                impactPerSecond: -20.0,
-                durationInSeconds: 7
+                impactPerSecond: -10.0,
+                durationInSeconds: 14
             },
 
             {
@@ -318,52 +318,40 @@ class NewsManager {
     generateNews(activeActions) {
         if (!activeActions || activeActions.length === 0) return null;
 
-        // On mélange et on prend la première news
-        const shuffledNews = [...this.newsList].sort(() => 0.5 - Math.random());
-        const newsTemplate = shuffledNews[0];
+        // 1. On sépare le hasard des news Macro (ex: 15% de chances qu'un événement mondial arrive)
+        if (Math.random() < 0.15) {
+            const macroNews = this.newsList.filter(n => n.targetSector === "ALL");
+            if (macroNews.length > 0) {
+                const template = macroNews[Math.floor(Math.random() * macroNews.length)];
+                activeActions.forEach(a => a.applyNews(template.impactPerSecond, template.durationInSeconds));
 
-        console.log(`[DEBUG NEWS] ID: ${newsTemplate.id} | Impact: ${newsTemplate.impactPerSecond}€/s | Durée: ${newsTemplate.durationInSeconds}s`);
-
-        // 1. GESTION DES NEWS MACRO (Touche tout le monde)
-        if (newsTemplate.targetSector === "ALL") {
-            activeActions.forEach(a => a.applyNews(newsTemplate.impactPerSecond, newsTemplate.durationInSeconds));
-            this.activeNews = {
-                text: newsTemplate.text,
-                type: newsTemplate.type
-            };
-            return this.activeNews;
+                console.log(`[DEBUG MACRO] L'économie globale est touchée !`);
+                return { text: template.text, type: template.type };
+            }
         }
 
-        // 2. GESTION DES NEWS CIBLÉES
-        // --- LA CORRECTION EST ICI ---
-        // On filtre pour que la news ne touche QUE les entreprises de son propre secteur
-        const targetActions = activeActions.filter(a => a.sector === newsTemplate.targetSector);
+        // 2. On détermine l'humeur du marché (Bonne ou Mauvaise nouvelle ?)
+        // J'ai mis 60% de chances d'avoir une mauvaise news pour le côté "Wall Street impitoyable"
+        const isPositive = Math.random() > 0.6;
 
-        // Sécurité : Si par hasard il n'y a aucune action de ce secteur en jeu, on annule.
-        if (targetActions.length === 0) return null;
-
-        const isPositive = newsTemplate.impactPerSecond > 0;
-
-        // Le prix de référence reste celui du LEADER GLOBAL du jeu (tous secteurs confondus)
+        // 3. ON CHOISIT LA CIBLE PARMI *TOUTES* LES ACTIONS (La vraie roulette globale)
+        // C'est ici que ManqueDo est sauvée si elle est moins chère qu'Amazone !
         const globalMaxPrice = Math.max(...activeActions.map(a => a.price));
 
-        const weightedActions = targetActions.map(action => {
+        const weightedActions = activeActions.map(action => {
             let weight = 1.0;
-
             if (this.priceBiasIntensity > 0) {
-                // Comparaison par rapport au leader global
                 const relativePrice = Math.max(0.01, action.price / globalMaxPrice);
-
-                if (isPositive) {
-                    weight = Math.pow(1 / relativePrice, this.priceBiasIntensity);
-                } else {
-                    weight = Math.pow(relativePrice, this.priceBiasIntensity);
-                }
+                // Si bonne news -> Avantage aux petites actions
+                // Si mauvaise news -> Punition pour les grosses
+                weight = isPositive
+                    ? Math.pow(1 / relativePrice, this.priceBiasIntensity)
+                    : Math.pow(relativePrice, this.priceBiasIntensity);
             }
             return { action, weight };
         });
 
-        // Tirage au sort de la victime/du gagnant
+        // La roulette tourne sur 100% des actions présentes
         const totalWeight = weightedActions.reduce((sum, aw) => sum + aw.weight, 0);
         let randomValue = Math.random() * totalWeight;
         let targetAction = weightedActions[0].action;
@@ -376,9 +364,24 @@ class NewsManager {
             }
         }
 
-        console.log(`[DEBUG BIAS] Cible choisie : ${targetAction.name} (Prix actuel : ${targetAction.price}€)`);
+        // 4. MAINTENANT qu'on a la cible, on pioche une news de SON secteur
+        const typeCondition = isPositive ? ["positive"] : ["negative", "informative"];
 
-        // Application
+        const validNews = this.newsList.filter(n =>
+            n.targetSector === targetAction.sector &&
+            typeCondition.includes(n.type)
+        );
+
+        // Sécurité : S'il n'y a pas de news exacte pour cette humeur, on prend n'importe laquelle de son secteur
+        let pool = validNews.length > 0 ? validNews : this.newsList.filter(n => n.targetSector === targetAction.sector);
+
+        if (pool.length === 0) return null; // Sécurité finale au cas où le secteur est vide de news
+
+        const newsTemplate = pool[Math.floor(Math.random() * pool.length)];
+
+        console.log(`[DEBUG BIAS] Victime/Gagnant : ${targetAction.name} (${targetAction.price}€) | News : ${newsTemplate.id}`);
+
+        // 5. Application de la news
         const formattedText = newsTemplate.text.replace(/{COMPANY}/g, targetAction.name);
         targetAction.applyNews(newsTemplate.impactPerSecond, newsTemplate.durationInSeconds);
 

@@ -19,6 +19,7 @@ let netWorthHistory = [];
 let netWorthChart;
 let hasSubmittedName = false;
 let currentPlayerCash = 0; // Global variable for player's cash
+let previousLeaderboard = []; // NOUVEAU : Mémoire du classement
 
 // --- State Management Functions ---
 function showState(state) {
@@ -43,7 +44,7 @@ function initializeChart() {
                 label: 'Net Worth',
                 data: [],
                 borderColor: '#FFFFFF', // Solid white color
-                borderWidth: 2,
+                borderWidth: 4,
                 fill: false,
                 tension: 0.4,
                 pointRadius: 0,
@@ -88,19 +89,40 @@ socket.on('player:joined', (data) => {
     }
 });
 
-socket.on('game:open', () => {
-    if (hasSubmittedName) {
+
+
+socket.on('player:update', data => {
+    // Si le joueur est actif mais que l'écran de jeu est caché, on le lance
+
+    if (data.isActive && gameSection.style.display === 'none') {
         showState('game');
         initializeChart();
     }
-});
+    // Si le jeu est fermé/en attente, on le renvoie dans le lobby
+    else if (data.isWaiting && waitingSection.style.display === 'none') {
+        showState('waiting');
+    }
 
-socket.on('player:update', data => {
     playerNameDisplay.textContent = data.name || "Player";
     netWorthDisplay.textContent = `${data.totalValue.toLocaleString()} €`;
     walletDisplay.textContent = `Wallet: ${data.cash.toLocaleString()} €`;
     currentPlayerCash = data.cash;
     updateChart(data.totalValue);
+
+    // --- CALCUL DE LA TENDANCE REVOLUT ---
+    // On compare le score actuel avec le plus vieux score de l'historique (max 60s)
+    let oldNetWorth = netWorthHistory.length > 0 ? netWorthHistory[0].value : data.totalValue;
+    let diff = data.totalValue - oldNetWorth;
+    let diffPercent = oldNetWorth > 0 ? (diff / oldNetWorth) * 100 : 0;
+
+    const trendDisplay = document.getElementById('net-worth-trend-display');
+    if (diff > 0) {
+        trendDisplay.innerHTML = `<span class="trend-up">+$${Math.round(diff).toLocaleString()} ▲${Math.abs(diffPercent).toFixed(1)}%</span>`;
+    } else if (diff < 0) {
+        trendDisplay.innerHTML = `<span class="trend-down">-$${Math.round(Math.abs(diff)).toLocaleString()} ▼${Math.abs(diffPercent).toFixed(1)}%</span>`;
+    } else {
+        trendDisplay.innerHTML = `<span class="trend-eq">= $0 0%</span>`;
+    }
 
     document.querySelectorAll('.action-card').forEach(card => {
         // card.dataset.actionName contient déjà le nom complet (ex: "ManqueDo")
@@ -194,6 +216,14 @@ socket.on('game:update', data => {
                 });
             }
         });
+    }
+
+    //MISE À JOUR DU LEADERBOARD
+
+    if (data.leaderboard) {
+        renderLeaderboard(data.leaderboard);
+        // On sauvegarde le classement pour calculer les flèches à la seconde suivante
+        previousLeaderboard = data.leaderboard;
     }
 });
 
@@ -289,3 +319,91 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('player:join', name);
     });
 });
+
+function renderLeaderboard(currentLeaderboard) {
+    const lbContainer = document.getElementById('leaderboard-container');
+    if (!lbContainer) return;
+
+    const myId = socket.id;
+    let myIndex = currentLeaderboard.findIndex(p => p.id === myId);
+
+    if (myIndex === -1) return; // Joueur non trouvé dans le classement
+
+    const totalPlayers = currentLeaderboard.length;
+    const myRank = myIndex + 1;
+
+    // Calcul de la tendance globale du joueur pour le header
+    const myPrevIndex = previousLeaderboard.findIndex(p => p.id === myId);
+    let mainTrendIcon = '=';
+    let mainTrendClass = 'trend-eq';
+    if (myPrevIndex !== -1) {
+        if (myIndex < myPrevIndex) { mainTrendIcon = '▲'; mainTrendClass = 'trend-up'; }
+        else if (myIndex > myPrevIndex) { mainTrendIcon = '▼'; mainTrendClass = 'trend-down'; }
+    }
+
+    let html = `<div class="lb-header">LEADERBOARD</div>`;
+    html += `<div class="lb-subheader"><span class="${mainTrendClass}">${mainTrendIcon}</span> ${myRank}/${totalPlayers}</div>`;
+
+    // Fonction utilitaire pour générer une ligne du tableau
+    // Fonction utilitaire pour générer une ligne du tableau
+    const generateRow = (player, index) => {
+        const rank = index + 1;
+        const isMe = player.id === myId;
+        const nameDisplay = isMe ? 'YOU' : player.name;
+        const nameClass = isMe ? 'lb-name is-me' : 'lb-name';
+
+        // Calcul de la tendance du joueur
+        let trendIcon = '=';
+        let trendClass = 'trend-eq';
+        const prevIdx = previousLeaderboard.findIndex(p => p.id === player.id);
+
+        if (prevIdx !== -1) {
+            if (index < prevIdx) { trendIcon = '▲'; trendClass = 'trend-up'; }
+            else if (index > prevIdx) { trendIcon = '▼'; trendClass = 'trend-down'; }
+        } else {
+            trendIcon = '▲'; trendClass = 'trend-up'; // Nouveau joueur entrant
+        }
+
+        const rankDisplay = rank === 1
+            ? `<span class="crown">👑</span> 1`
+            : `<span class="${trendClass}">${trendIcon}</span> ${rank}`;
+
+        // 1. D'ABORD on fait le calcul mathématique sans décimales
+        const formattedScore = Math.round(player.totalValue).toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+
+        // 2. ENSUITE on renvoie proprement le bloc HTML avec les variables
+        return `
+            <div class="lb-row">
+                <div class="lb-rank">${rankDisplay}</div>
+                <div class="${nameClass}">${nameDisplay}</div>
+                <div class="lb-score">$${formattedScore}</div>
+            </div>
+        `;
+    };
+
+    // 1. On affiche toujours le TOP 1
+    if (currentLeaderboard.length > 0) {
+        html += generateRow(currentLeaderboard[0], 0);
+    }
+
+    // 2. Les joueurs autour de nous
+    // On prend 2 rangs au-dessus, et 2 rangs en-dessous
+    let startIdx = Math.max(1, myIndex - 2); // On ne redessine pas le Top 1
+    let endIdx = Math.min(totalPlayers - 1, myIndex + 2);
+
+    // Si on est loin du Top 1, on met des pointillés
+    if (startIdx > 1) {
+        html += `<div class="lb-ellipses">...</div>`;
+    }
+
+    for (let i = startIdx; i <= endIdx; i++) {
+        html += generateRow(currentLeaderboard[i], i);
+    }
+
+    // Si on est loin du dernier joueur, on met des pointillés en bas
+    if (endIdx < totalPlayers - 1) {
+        html += `<div class="lb-ellipses">...</div>`;
+    }
+
+    lbContainer.innerHTML = html;
+}

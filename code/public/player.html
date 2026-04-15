@@ -25,15 +25,31 @@
 
     <!-- Main Game Section -->
     <section id="game-section" style="display: none;">
-        <div class="player-name" id="player-name-display"></div>
-        <div class="net-worth" id="net-worth-display"></div>
-        <canvas id="background-graph" class="background-graph"></canvas>
-        <div class="wallet" id="wallet-display"></div>
+        <header class="player-header">
+            <div class="player-name" id="player-name-display"></div>
+            <div class="net-worth" id="net-worth-display"></div>
+
+            <div class="net-worth-trend" id="net-worth-trend-display">
+                <span class="trend-eq">= 0€ 0%</span>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="background-graph" class="main-graph"></canvas>
+            </div>
+
+            <hr class="header-divider">
+            <div class="wallet-label">Wallet <br><span id="wallet-display"></span></div>
+        </header>
 
         <div class="actions-container" id="actions-container">
             <!-- Action cards will be injected here -->
         </div>
+        <section id="leaderboard-section" class="player-card leaderboard-card">
+            <div id="leaderboard-container"></div>
+        </section>
     </section>
+
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
