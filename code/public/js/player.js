@@ -166,7 +166,6 @@ socket.on('player:update', data => {
 });
 
 socket.on('game:update', data => {
-    socket.on('game:update', data => {
         if (!Array.isArray(data.actions)) return;
 
         // 1. On liste les noms des actions actuellement affichées sur l'écran du joueur
@@ -238,7 +237,6 @@ socket.on('game:update', data => {
         // On sauvegarde le classement pour calculer les flèches à la seconde suivante
         previousLeaderboard = data.leaderboard;
     }
-    });
 });
 
 // --- UI Creation and Interaction ---
