@@ -228,7 +228,18 @@ class GameLoop {
             shortName: action.shortName,
             sector: action.sector,
             currentPrice: action.price,
-            history: action.history
+            history: action.history.slice(-50) // On ne garde que les 50 derniers points
+        }));
+    }
+
+    // NOUVEAU : Pour les téléphones des joueurs (Ultra-léger)
+    getMobileActions() {
+        return this.actions.map(action => ({
+            name: action.name,
+            shortName: action.shortName,
+            sector: action.sector,
+            currentPrice: action.price
+            // AUCUN HISTORIQUE ICI ! Le poids des données est divisé par 100.
         }));
     }
 
@@ -366,13 +377,15 @@ class GameLoop {
 
     // Ajout de endStats dans la diffusion
     broadcastGameState(newsEvent = null, endStats = null) {
-        // CORRECTION OPTIMISATION : On calcule les lourdes listes UNE SEULE FOIS
-        const publicActions = this.getPublicActions();
+        // On prépare les deux paquets
+        const screenActions = this.getPublicActions(); // Pour l'écran (avec historique max 50)
+        const mobileActions = this.getMobileActions(); // Pour les téléphones (sans historique)
         const leaderboard = this.getLeaderboard();
 
+        // 1. Envoi global (principalement écouté par le Screen)
         this.io.emit("game:update", {
             isGameOpen: this.isGameOpen,
-            actions: publicActions,
+            actions: screenActions,
             leaderboard: leaderboard,
             newsEvent,
             endStats
@@ -380,9 +393,10 @@ class GameLoop {
 
         this.emitLobbyState();
 
-        // On distribue la même liste d'actions à tout le monde sans la recalculer
+        // 2. Envoi individuel ultra-léger aux téléphones
         for (const socketId in this.players) {
-            this.emitPlayerState(socketId, publicActions);
+            // On envoie 'mobileActions' au lieu de la grosse liste
+            this.emitPlayerState(socketId, mobileActions);
         }
     }
 
