@@ -169,8 +169,11 @@ class GameLoop {
         player.portfolio[action.name].quantity += quantity;
         player.portfolio[action.name].invested += cost;
 
-        this.tradeCounts[socketId]++; // +1 Trade
-        this.broadcastGameState();
+        this.tradeCounts[socketId]++;
+
+        // CORRECTION : On met à jour SEULEMENT le joueur qui vient d'acheter
+        // Le reste du monde verra la mise à jour à la prochaine seconde du Tick()
+        this.emitPlayerState(socketId);
     }
 
     sellAction(socketId, actionIdentifier, quantity) {
@@ -191,8 +194,10 @@ class GameLoop {
             player.portfolio[action.name].invested = 0;
         }
 
-        this.tradeCounts[socketId]++; // +1 Trade
-        this.broadcastGameState();
+        this.tradeCounts[socketId]++;
+
+        // CORRECTION : Pareil ici, feedback instantané uniquement pour le vendeur
+        this.emitPlayerState(socketId);
     }
 
     getPlayerTotalValue(player) {
@@ -236,14 +241,15 @@ class GameLoop {
         });
     }
 
-    emitPlayerState(socketId) {
+    emitPlayerState(socketId, precalculatedActions = null) {
         const player = this.players[socketId];
         if (!player) return;
         this.io.to(socketId).emit("player:update", {
             name: player.name,
             cash: player.cash,
             portfolio: player.portfolio,
-            actions: this.getPublicActions(),
+            // On utilise les actions précalculées si elles sont fournies
+            actions: precalculatedActions || this.getPublicActions(),
             totalValue: this.getPlayerTotalValue(player),
             isGameOpen: this.isGameOpen,
             isWaiting: player.hasJoined && !player.isActive,
@@ -360,17 +366,23 @@ class GameLoop {
 
     // Ajout de endStats dans la diffusion
     broadcastGameState(newsEvent = null, endStats = null) {
+        // CORRECTION OPTIMISATION : On calcule les lourdes listes UNE SEULE FOIS
+        const publicActions = this.getPublicActions();
+        const leaderboard = this.getLeaderboard();
+
         this.io.emit("game:update", {
             isGameOpen: this.isGameOpen,
-            actions: this.getPublicActions(),
-            leaderboard: this.getLeaderboard(),
+            actions: publicActions,
+            leaderboard: leaderboard,
             newsEvent,
-            endStats // Le front-end s'en servira pour déclencher l'animation
+            endStats
         });
 
         this.emitLobbyState();
+
+        // On distribue la même liste d'actions à tout le monde sans la recalculer
         for (const socketId in this.players) {
-            this.emitPlayerState(socketId);
+            this.emitPlayerState(socketId, publicActions);
         }
     }
 

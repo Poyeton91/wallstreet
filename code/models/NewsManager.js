@@ -82,6 +82,39 @@ class NewsManager {
                 impactPerSecond: 10.0,
                 durationInSeconds: 18
             },
+            {
+                id: "tech_ceo_gaming",
+                type: "informative",
+                text: "Le PDG de {COMPANY} s'est mis au stream hier soir. Les gens semblent aimer !",
+                targetSector: "tech",
+                impactPerSecond: 3.0,
+                durationInSeconds: 20
+            },
+            {
+                id: "tech_ai_insult",
+                type: "negative",
+                text: "Bad Buzz : La nouvelle IA de {COMPANY} s'est mise à insulter les clients du service après-vente.",
+                targetSector: "tech",
+                impactPerSecond: -20.0,
+                durationInSeconds: 4
+            },
+            {
+                id: "tech_intern_cable",
+                type: "negative",
+                text: "Un stagiaire de {COMPANY} a débranché le serveur principal pour brancher son appareil à raclette.",
+                targetSector: "tech",
+                impactPerSecond: -20.0,
+                durationInSeconds: 5
+            },
+            {
+                id: "tech_logo_change",
+                type: "informative",
+                text: "{COMPANY} a dépensé 50 millions pour rendre son logo 'légèrement plus bleu'. Le marché observe.",
+                targetSector: "tech",
+                impactPerSecond: -2.0,
+                durationInSeconds: 15
+            },
+
             // --- NEWS AUTO ---
             {
                 id: "auto_recall",
@@ -138,6 +171,38 @@ class NewsManager {
                 targetSector: "auto",
                 impactPerSecond: 13.0,
                 durationInSeconds: 14
+            },
+            {
+                id: "auto_horn_hack",
+                type: "negative",
+                text: "Piratage : Les klaxons des voitures {COMPANY} ont sonnées cette nuit à 3h du matin. Bad buzz.",
+                targetSector: "auto",
+                impactPerSecond: -8.0,
+                durationInSeconds: 12
+            },
+            {
+                id: "auto_ceo_bicycle",
+                type: "informative",
+                text: "Rumeur : Le patron de {COMPANY} a été aperçu en train de venir au travail à trottinette. -1000 Aura",
+                targetSector: "auto",
+                impactPerSecond: -3.0,
+                durationInSeconds: 10
+            },
+            {
+                id: "auto_flying_car",
+                type: "positive",
+                text: "{COMPANY} dépose le brevet d'une voiture volante. Une hype se crée!",
+                targetSector: "auto",
+                impactPerSecond: 15.0,
+                durationInSeconds: 20
+            },
+            {
+                id: "auto_gps_lost",
+                type: "negative",
+                text: "Le GPS intégré de {COMPANY} a conduit un convoi de politiciens dans un lac. Gros procès en vue.",
+                targetSector: "auto",
+                impactPerSecond: -40.0,
+                durationInSeconds: 4
             },
 
 
@@ -207,6 +272,24 @@ class NewsManager {
                 targetSector: "food",
                 impactPerSecond: -8.0,
                 durationInSeconds: 12
+            },
+
+            {
+                id: "food_quantum_burger",
+                type: "positive",
+                text: "Le nouveau Burger de {COMPANY} devient une trend mondiale sur TikTok.",
+                targetSector: "food",
+                impactPerSecond: 18.0,
+                durationInSeconds: 12
+            },
+
+            {
+                id: "food_toy_swallowed",
+                type: "negative",
+                text: "Un influenceur s'étouffe avec le jouet offert dans le menu {COMPANY}. L'action dégringole.",
+                targetSector: "food",
+                impactPerSecond: -25.0,
+                durationInSeconds: 7
             },
 
 
